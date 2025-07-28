@@ -5,7 +5,7 @@ import routes from './routes';
 
 const express = require('express');
 
-const { PORT = 4000 } = process.env;
+const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(express.json());
