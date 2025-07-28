@@ -19,7 +19,7 @@ export const getCards = (req: Request, res: Response, next: NextFunction) => {
       { path: 'owner', select: '_id name about avatar' },
       { path: 'likes', select: '_id name about avatar' },
     ])
-    .then((cards) => cards.map((card) => (serializeCard(card))))
+    .then((cards) => cards.map((card) => serializeCard(card)))
     .then((cards) => res.send(cards))
     .catch(next);
 };
