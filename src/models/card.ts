@@ -1,6 +1,7 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 
 export interface ICard {
+  _id: mongoose.Types.ObjectId;
   name: string;
   link: string;
   owner: Schema.Types.ObjectId,

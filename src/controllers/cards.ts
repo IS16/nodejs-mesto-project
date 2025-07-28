@@ -1,17 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import Card from '../models/card';
+import { validateObjectId } from '../utils/validate-objectId';
+import { HttpStatusCode } from '../utils/http-status-codes';
+import { NotFoundError } from '../errors/not-found-err';
+import Card, { ICard } from '../models/card';
 
-const BadRequestError = require('../errors/bad-request-err');
-const NotFoundError = require('../errors/not-found-err');
-
-const validateObjectId = (_id: string) => {
-  try {
-    return new mongoose.Types.ObjectId(_id);
-  } catch (err) {
-    throw new BadRequestError('Невалидный cardId');
-  }
-};
+export const serializeCard = (card: ICard) => ({
+  _id: card._id,
+  name: card.name,
+  link: card.link,
+  owner: card.owner,
+  likes: card.likes,
+  createdAt: card.createdAt,
+});
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => {
   Card.find({})
@@ -19,21 +19,14 @@ export const getCards = (req: Request, res: Response, next: NextFunction) => {
       { path: 'owner', select: '_id name about avatar' },
       { path: 'likes', select: '_id name about avatar' },
     ])
-    .then((cards) => cards.map((card) => ({
-      _id: card._id,
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      likes: card.likes,
-      createdAt: card.createdAt,
-    })))
+    .then((cards) => cards.map((card) => (serializeCard(card))))
     .then((cards) => res.send(cards))
     .catch(next);
 };
 
-export const deleteCardById = (req: any, res: Response, next: NextFunction) => {
+export const deleteCardById = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
-  const objId = validateObjectId(cardId);
+  const objId = validateObjectId(cardId, 'cardId');
 
   return Card.findByIdAndDelete(objId)
     .then((card) => {
@@ -41,7 +34,7 @@ export const deleteCardById = (req: any, res: Response, next: NextFunction) => {
         throw new NotFoundError('Карточка не найдена');
       }
 
-      res.send({ messsage: 'Пост удалён' });
+      res.status(HttpStatusCode.NoContent).send({ messsage: 'Пост удалён' });
     })
     .catch(next);
 };
@@ -51,20 +44,13 @@ export const createCard = (req: any, res: Response, next: NextFunction) => {
   const ownerId = req.user._id;
 
   return Card.create({ name, link, owner: ownerId })
-    .then((card) => res.send({
-      _id: card._id,
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      likes: card.likes,
-      createdAt: card.createdAt,
-    }))
+    .then((card) => res.status(HttpStatusCode.Created).send(serializeCard(card)))
     .catch(next);
 };
 
 export const likeCard = (req: any, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
-  const objId = validateObjectId(cardId);
+  const objId = validateObjectId(cardId, 'cardId');
 
   const userId = req.user._id;
 
@@ -78,21 +64,14 @@ export const likeCard = (req: any, res: Response, next: NextFunction) => {
         throw new NotFoundError('Карточка не найдена');
       }
 
-      res.send({
-        _id: card._id,
-        name: card.name,
-        link: card.link,
-        owner: card.owner,
-        likes: card.likes,
-        createdAt: card.createdAt,
-      });
+      res.send(serializeCard(card));
     })
     .catch(next);
 };
 
 export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
-  const objId = validateObjectId(cardId);
+  const objId = validateObjectId(cardId, 'cardId');
 
   const userId = req.user._id;
 
@@ -106,14 +85,7 @@ export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
         throw new NotFoundError('Карточка не найдена');
       }
 
-      res.send({
-        _id: card._id,
-        name: card.name,
-        link: card.link,
-        owner: card.owner,
-        likes: card.likes,
-        createdAt: card.createdAt,
-      });
+      res.send(serializeCard(card));
     })
     .catch(next);
 };

@@ -1,10 +1,12 @@
-class BadRequestError extends Error {
+import { HttpStatusCode } from '../utils/http-status-codes';
+
+export class BadRequestError extends Error {
   statusCode: number;
 
   constructor(message: string) {
     super(message);
-    this.statusCode = 400;
+    this.statusCode = HttpStatusCode.BadRequest;
   }
 }
 
-module.exports = BadRequestError;
+export default BadRequestError;

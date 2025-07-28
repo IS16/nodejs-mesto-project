@@ -1,17 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import usersRouter from './routes/users';
-import cardsRouter from './routes/cards';
+import { HttpStatusCode, DEFAULT_SERVER_ERROR } from './utils/http-status-codes';
+import routes from './routes';
 
 const express = require('express');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 4000 } = process.env;
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+mongoose.connect('mongodb://localhost:27017/mestodb')
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server starts at port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });
 
 app.use((req: any, res: Response, next: NextFunction) => {
   req.user = {
@@ -21,16 +30,15 @@ app.use((req: any, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use(routes);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  const { statusCode = 500, message } = err;
+  const { statusCode = HttpStatusCode.InternalServerError, message } = err;
 
-  res.status(statusCode).send({ message: statusCode === 500 ? 'Произошла ошибка' : message });
+  res.status(statusCode).send({
+    message: statusCode === HttpStatusCode.InternalServerError
+      ? DEFAULT_SERVER_ERROR
+      : message,
+  });
   next();
-});
-
-app.listen(PORT, () => {
-  console.log(`Server starts at port ${PORT}`);
 });

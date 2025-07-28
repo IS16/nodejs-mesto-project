@@ -1,10 +1,12 @@
-class NotFoundError extends Error {
+import { HttpStatusCode } from '../utils/http-status-codes';
+
+export class NotFoundError extends Error {
   statusCode: number;
 
   constructor(message: string) {
     super(message);
-    this.statusCode = 404;
+    this.statusCode = HttpStatusCode.NotFound;
   }
 }
 
-module.exports = NotFoundError;
+export default NotFoundError;

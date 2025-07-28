@@ -1,10 +1,12 @@
-class InternalServerError extends Error {
+import { HttpStatusCode } from '../utils/http-status-codes';
+
+export class InternalServerError extends Error {
   statusCode: number;
 
   constructor(message: string) {
     super(message);
-    this.statusCode = 500;
+    this.statusCode = HttpStatusCode.InternalServerError;
   }
 }
 
-module.exports = InternalServerError;
+export default InternalServerError;
