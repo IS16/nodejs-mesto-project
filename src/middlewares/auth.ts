@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import { UnauthorizedError } from '../errors/unauthorized-err';
 
-const { JWT_SECRET = 'very-strong-secret-key' } = process.env;
+import { JWT_SECRET } from '../config';
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose, { Types } from 'mongoose';
+import { PORT } from './config';
 import { HttpStatusCode, DEFAULT_SERVER_ERROR } from './utils/http-status-codes';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import routes from './routes';
@@ -15,7 +16,6 @@ declare module 'express-serve-static-core' {
   }
 }
 
-const { PORT = 4000 } = process.env;
 const app = express();
 
 app.use(express.json());

@@ -9,7 +9,7 @@ import { BadRequestError } from '../errors/bad-request-err';
 import { ConflictError } from '../errors/conflict-err';
 import User, { IUser } from '../models/user';
 
-const { JWT_SECRET = 'very-strong-secret-key' } = process.env;
+import { JWT_SECRET } from '../config';
 
 export const serializeUser = (user: IUser) => ({
   _id: user._id,
