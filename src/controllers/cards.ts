@@ -30,7 +30,7 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
   const objId = validateObjectId(cardId, 'cardId');
   const ownerId = req.user._id;
 
-  return Card.findByIdAndDelete(objId)
+  return Card.findById(objId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
@@ -40,8 +40,9 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
         throw new ForbiddenError('Доступ запрещён');
       }
 
-      res.status(HttpStatusCode.NoContent).send({ messsage: 'Пост удалён' });
+      return Card.deleteOne({ _id: objId });
     })
+    .then(() => res.status(HttpStatusCode.NoContent).send({ messsage: 'Пост удалён' }))
     .catch(next);
 };
 

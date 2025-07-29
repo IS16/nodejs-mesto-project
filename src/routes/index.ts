@@ -1,4 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import {
+  Router, Request, Response, NextFunction,
+} from 'express';
 import { NotFoundError } from '../errors/not-found-err';
 import usersRouter from './users';
 import cardsRouter from './cards';
