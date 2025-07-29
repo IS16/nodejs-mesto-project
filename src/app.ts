@@ -1,11 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { HttpStatusCode, DEFAULT_SERVER_ERROR } from './utils/http-status-codes';
+import { requestLogger, errorLogger } from './middlewares/logger';
 import routes from './routes';
 
 const express = require('express');
 
-const { PORT = 3000 } = process.env;
+declare module 'express-serve-static-core' {
+  // eslint-disable-next-line no-shadow, no-unused-vars
+  interface Request {
+    user: {
+      _id: Types.ObjectId;
+    };
+  }
+}
+
+const { PORT = 4000 } = process.env;
 const app = express();
 
 app.use(express.json());
@@ -22,16 +32,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb')
     process.exit(1);
   });
 
-app.use((req: any, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: new mongoose.Types.ObjectId('6886a8eccd2fcf81dd4f919b'),
-  };
-
-  next();
-});
-
+app.use(requestLogger);
 app.use(routes);
 
+app.use(errorLogger);
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const { statusCode = HttpStatusCode.InternalServerError, message } = err;
 

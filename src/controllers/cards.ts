@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { validateObjectId } from '../utils/validate-objectId';
 import { HttpStatusCode } from '../utils/http-status-codes';
 import { NotFoundError } from '../errors/not-found-err';
+import { ForbiddenError } from '../errors/forbidden-err';
 import Card, { ICard } from '../models/card';
 
 export const serializeCard = (card: ICard) => ({
@@ -27,6 +28,7 @@ export const getCards = (req: Request, res: Response, next: NextFunction) => {
 export const deleteCardById = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
   const objId = validateObjectId(cardId, 'cardId');
+  const ownerId = req.user._id;
 
   return Card.findByIdAndDelete(objId)
     .then((card) => {
@@ -34,12 +36,16 @@ export const deleteCardById = (req: Request, res: Response, next: NextFunction) 
         throw new NotFoundError('Карточка не найдена');
       }
 
+      if (!card.owner._id.equals(ownerId)) {
+        throw new ForbiddenError('Доступ запрещён');
+      }
+
       res.status(HttpStatusCode.NoContent).send({ messsage: 'Пост удалён' });
     })
     .catch(next);
 };
 
-export const createCard = (req: any, res: Response, next: NextFunction) => {
+export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
   const ownerId = req.user._id;
 
@@ -48,7 +54,7 @@ export const createCard = (req: any, res: Response, next: NextFunction) => {
     .catch(next);
 };
 
-export const likeCard = (req: any, res: Response, next: NextFunction) => {
+export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
   const objId = validateObjectId(cardId, 'cardId');
 
@@ -69,7 +75,7 @@ export const likeCard = (req: any, res: Response, next: NextFunction) => {
     .catch(next);
 };
 
-export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
+export const dislikeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
   const objId = validateObjectId(cardId, 'cardId');
 
